@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Math Kids: Padan Nombor</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Trebuchet MS',sans-serif;
+}
+
+body{
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background:linear-gradient(135deg,#bfe9ff,#d9ffd8,#fff3a8);
+padding:20px;
+}
+
+.game{
+width:100%;
+max-width:850px;
+background:white;
+border-radius:30px;
+padding:25px;
+text-align:center;
+box-shadow:0 10px 30px rgba(0,0,0,.15);
+}
+
+h1{
+color:#2196f3;
+font-size:2.2rem;
+margin-bottom:15px;
+}
+
+.score{
+font-size:1.4rem;
+font-weight:bold;
+color:#ff9800;
+margin-bottom:20px;
+}
+
+.question{
+font-size:1.5rem;
+font-weight:bold;
+margin-bottom:20px;
+color:#444;
+}
+
+.apple-box{
+min-height:160px;
+display:flex;
+justify-content:center;
+flex-wrap:wrap;
+gap:10px;
+margin-bottom:20px;
+}
+
+.apple{
+font-size:3rem;
+animation:pop .3s;
+}
+
+@keyframes pop{
+from{
+transform:scale(0);
+}
+to{
+transform:scale(1);
+}
+}
+
+.options{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:15px;
+}
+
+button{
+padding:20px;
+font-size:1.8rem;
+font-weight:bold;
+border:none;
+border-radius:20px;
+cursor:pointer;
+transition:.2s;
+}
+
+button:hover{
+transform:scale(1.05);
+}
+
+.opt1{background:#ffd54f;}
+.opt2{background:#81d4fa;}
+.opt3{background:#a5d6a7;}
+.opt4{background:#ffab91;}
+
+.feedback{
+font-size:1.7rem;
+font-weight:bold;
+margin-top:20px;
+min-height:40px;
+}
+
+.correct{
+color:#2e7d32;
+}
+
+.wrong{
+color:#e53935;
+}
+
+.star{
+position:fixed;
+font-size:30px;
+pointer-events:none;
+animation:fly 1s forwards;
+}
+
+@keyframes fly{
+0%{
+opacity:1;
+transform:translateY(0) scale(1);
+}
+100%{
+opacity:0;
+transform:translateY(-150px) scale(2);
+}
+}
+
+@media(max-width:600px){
+
+h1{
+font-size:1.7rem;
+}
+
+button{
+font-size:1.4rem;
+padding:16px;
+}
+
+.apple{
+font-size:2.5rem;
+}
+}
+</style>
+</head>
+<body>
+
+<div class="game">
+
+<h1>🍎 Math Kids: Padan Nombor</h1>
+
+<div class="score">
+⭐ Skor: <span id="score">0</span>
+</div>
+
+<div class="question">
+Berapa jumlah epal di bawah?
+</div>
+
+<div id="apples" class="apple-box"></div>
+
+<div id="options" class="options"></div>
+
+<div id="feedback" class="feedback"></div>
+
+</div>
+
+<script>
+
+let answer=0;
+let score=0;
+
+function playSuccess(){
+
+const ctx=new (window.AudioContext||window.webkitAudioContext)();
+
+const osc=ctx.createOscillator();
+const gain=ctx.createGain();
+
+osc.connect(gain);
+gain.connect(ctx.destination);
+
+osc.type="triangle";
+osc.frequency.value=700;
+
+gain.gain.value=0.1;
+
+osc.start();
+
+setTimeout(()=>{
+osc.frequency.value=1000;
+},100);
+
+setTimeout(()=>{
+osc.stop();
+},250);
+
+}
+
+function stars(){
+
+for(let i=0;i<10;i++){
+
+const s=document.createElement("div");
+
+s.innerHTML="⭐";
+s.className="star";
+
+s.style.left=(window.innerWidth/2+(Math.random()*300-150))+"px";
+s.style.top=(window.innerHeight/2)+"px";
+
+document.body.appendChild(s);
+
+setTimeout(()=>{
+s.remove();
+},1000);
+
+}
+}
+
+function generateQuestion(){
+
+document.getElementById("feedback").innerHTML="";
+
+answer=Math.floor(Math.random()*10)+1;
+
+const appleBox=document.getElementById("apples");
+appleBox.innerHTML="";
+
+for(let i=0;i<answer;i++){
+
+const apple=document.createElement("div");
+apple.className="apple";
+apple.innerHTML="🍎";
+
+appleBox.appendChild(apple);
+
+}
+
+let choices=[answer];
+
+while(choices.length<4){
+
+let n=Math.floor(Math.random()*10)+1;
+
+if(!choices.includes(n)){
+choices.push(n);
+}
+
+}
+
+choices.sort(()=>Math.random()-0.5);
+
+const options=document.getElementById("options");
+options.innerHTML="";
+
+choices.forEach(num=>{
+
+const btn=document.createElement("button");
+
+btn.textContent=num;
+
+btn.classList.add(
+["opt1","opt2","opt3","opt4"][
+Math.floor(Math.random()*4)
+]
+);
+
+btn.onclick=()=>checkAnswer(num);
+
+options.appendChild(btn);
+
+});
+
+}
+
+function checkAnswer(num){
+
+const feedback=document.getElementById("feedback");
+
+if(num===answer){
+
+score+=10;
+
+document.getElementById("score").textContent=score;
+
+feedback.textContent="Hebat! 🎉";
+feedback.className="feedback correct";
+
+playSuccess();
+stars();
+
+setTimeout(generateQuestion,1000);
+
+}else{
+
+feedback.textContent="Cuba lagi!";
+feedback.className="feedback wrong";
+
+}
+
+}
+
+generateQuestion();
+
+</script>
+
+</body>
+</html>
